@@ -5,8 +5,9 @@ import { UserContext } from "../providers/UserProvider";
 
 const menuItemsOptions = [
     { text: 'Profile' },
-    { text: 'Map' },
     { text: 'About' },
+    { text: 'Chat'},
+    { text: 'Map' },
     { text: 'Contact' },
 ]
 

@@ -7,6 +7,7 @@ import ProfilePage from "./Functions/ProfilePage";
 import { UserContext } from "./providers/UserProvider";
 import PasswordReset from "./Functions/PasswordReset";
 import About from "./Functions/About";
+import Chat from "./Functions/Chat"
 import MenuContainer from "./Functions/MenuContainer";
 function Application() {
   const user = useContext(UserContext);
@@ -17,6 +18,7 @@ function Application() {
         <ProfilePage path = "/">
         </ProfilePage>
         <About path = "/About"></About>
+        <Chat path = "/Chat"></Chat>
         </Router>
       :
         <Router>

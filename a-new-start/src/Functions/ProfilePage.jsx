@@ -1,14 +1,61 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect  } from "react";
 import { UserContext } from "../providers/UserProvider";
 import { navigate } from "@reach/router";
 import MenuContainer from './MenuContainer'
-import {auth} from "../providers/firebase";
+import {auth, firestore} from "../providers/firebase";
 const ProfilePage = () => {
   const user = useContext(UserContext);
   const {photoURL, displayName, email, uid} = user;
-  console.log(user);
+  const [showFriends, setShowFriends] = useState(true);
+  const [searchMessage, setSearchMessage] = useState("Friend found");
+  const [idInputField, setIdInputFiel] = useState("")
+  const [friendstList, setFrinedsList] = useState([{}]);
+  const tempFriendList = [];
+
+  const friends = [{displayName: "John", email: "something@somthing.dk", id: "OHUvmrG7B1X2GZjc0oGu6PVtruk1"}, {displayName: "John", email: "something@somthing.dk", id: "rSCJ13XmhtMzojcHx8DSZwqCK582"}]
+  const [searchResult, setSearchResult] = useState({});
   
-  
+
+  const searchForFriend = async () => {
+      console.log("searching..");
+      try {
+        const friend = await firestore.doc("/users/" + idInputField).get().then(setShowFriends(false));
+        setSearchResult(friend.data());
+        
+      } catch (error) {
+          setSearchMessage("Friend not found")
+      }
+  }
+
+  const addFriend = async () => {
+    console.log("friend added..");
+    try {
+        const addFriend = await firestore.collection("/users/" + user.uid +"/friends").doc(idInputField).set({searchResult}); 
+        getFriends().then(setShowFriends(true));
+        
+    } catch (error) {
+        console.log(error);
+    }
+  }
+
+  const getFriends = async () => {
+      try {
+          const friendsCollection = await firestore.collection("/users/" + user.uid +"/friends").get();
+        friendsCollection.forEach(doc => {
+            tempFriendList.push({displayName: doc.data().searchResult.displayName, email: doc.data().searchResult.email, id: doc.id});
+            //tempFriendList.push(doc.data().searchResult, {id: doc.id});
+            console.log(doc.id);
+        });
+        setFrinedsList(tempFriendList);
+        console.log(tempFriendList);
+      } catch (error) {
+          console.log(error);
+      }
+  }
+
+  useEffect(() => {
+    getFriends();
+  }, [])
 
   return (
       <div>
@@ -26,9 +73,34 @@ const ProfilePage = () => {
         <div className = "md:pl-4">
         <h2 className = "text-2xl font-semibold">{displayName}</h2>
         <h3 className = "italic">{email}</h3>
+        <h3 className = "bold"><b>ID:</b> {uid}</h3>
         </div>
       </div>
-      <button className = "w-full py-3 bg-red-600 mt-4 text-white" onClick = {() => {auth.signOut()}}>Sign out</button>
+      {showFriends && <h2 className = "text-2xl font-semibold">Friends</h2>}
+      {showFriends && friendstList.map(friend => {
+          return(
+            <div style = {{marginBottom: '20px', borderWidth: 'thin', padding: '5px', borderRadius: '25px'}}>Name: {friend.displayName} <br/> Mail: {friend.email}</div>
+          )
+      })}
+      {showFriends &&
+      <div>
+      <h2 className = "text-2xl font-semibold">Add friend by ID</h2>
+      <input style ={{padding: '10px'}} placeholder="Your friends ID" onChange = {e => setIdInputFiel(e.target.value)}>
+      </input>
+      <button style ={{background: 'white', float: 'right', padding: '10px'}} onClick ={() => searchForFriend()}>Search</button>
+      </div>
+}
+        {!showFriends &&
+      <div>
+      <h2 className = "text-2xl font-semibold">{searchMessage}</h2>   
+      <div style = {{marginBottom: '20px', borderWidth: 'thin', padding: '5px', borderRadius: '25px'}}>Name: {searchResult.displayName} <br/> Mail: {searchResult.email}</div>
+      <button style ={{background: 'white', marginLeft: '0px', padding: '10px'}} onClick ={() => setShowFriends(true)}>Search again</button>
+      <button style ={{background: 'white', float: 'right', padding: '10px'}} onClick = {() => addFriend()}>Add friend</button>
+      </div>
+      }
+
+
+      <button className = "w-full py-4 bg-red-600 mt-5 text-white" style={{button: '0'}} onClick = {() => {auth.signOut()}}>Sign out</button>
     </div>
     </div>
   ) 

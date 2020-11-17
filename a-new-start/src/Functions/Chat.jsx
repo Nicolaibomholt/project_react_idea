@@ -2,12 +2,12 @@ import {firestore} from '../providers/firebase'
 import { UserContext } from "../providers/UserProvider";
 import React, { useState, useContext, useEffect } from "react";
 
-const About= () => {
+const Chat = () => {
 const user = useContext(UserContext);
 
     return (
         <div style = {{float: 'right', width: '75%', textAlign: 'center'}}>
-            <h1 style = {{fontSize: '50px'}}>Et test projekt</h1>
+            <h1 style = {{fontSize: '50px'}}>Chatten</h1>
             <p>
                 Dette er et test projekt, hvor jeg vil forsøge at lave nogle forskellige ting, <br/> en chat og nogle sjove map funktionaliteter
             </p>
@@ -15,4 +15,4 @@ const user = useContext(UserContext);
     )
     
 }
-export default About
+export default Chat
