@@ -12,7 +12,6 @@ const ProfilePage = () => {
   const [friendstList, setFrinedsList] = useState([{}]);
   const tempFriendList = [];
 
-  const friends = [{displayName: "John", email: "something@somthing.dk", id: "OHUvmrG7B1X2GZjc0oGu6PVtruk1"}, {displayName: "John", email: "something@somthing.dk", id: "rSCJ13XmhtMzojcHx8DSZwqCK582"}]
   const [searchResult, setSearchResult] = useState({});
   
 
@@ -21,10 +20,9 @@ const ProfilePage = () => {
       try {
         const friend = await firestore.doc("/users/" + idInputField).get().then(setShowFriends(false));
         setSearchResult(friend.data());
-        
       } catch (error) {
           setSearchMessage("Friend not found")
-      }
+      } 
   }
 
   const addFriend = async () => {
@@ -60,7 +58,7 @@ const ProfilePage = () => {
   return (
       <div>
     <div className = "mx-auto w-11/12 md:w-2/4 py-8 px-4 md:px-8" style= {{float: 'right'}}> 
-      <div className="flex border flex-col items-center md:flex-row md:items-start border-blue-400 px-3 py-4">
+      <div className="flex border flex-col items-center md:flex-row md:items-start border-blue-400 px-3 py-4" style = {{textAlign: 'end'}}>
         <div
           style={{
             background: `url(${photoURL || 'https://res.cloudinary.com/dqcsk8rsc/image/upload/v1577268053/avatar-1-bitmoji_upgwhc.png'})  no-repeat center center`,
