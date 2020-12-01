@@ -24,7 +24,7 @@ export default function MenuContainer() {
         setActiveItemPos(document.getElementById(activeItem).offsetTop)
         setActiveItemColor(window.getComputedStyle(document.getElementById(activeItem)).getPropertyValue('background-color'))
         if (activeItem==="Profile") {
-            navigate('/')
+            navigate('/base')
         }
         else {
         navigate(`/${ activeItem }`)
