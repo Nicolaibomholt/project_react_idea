@@ -15,10 +15,12 @@ const Chat = () => {
 
     const user = useContext(UserContext);
     const { photoURL, displayName, email, uid } = user;
-    const [friendList, setFrinedsList] = useState([{}]);
     const [progressCounter, setProgressCounter] = useState(0);
     const [processTitle, setProcessTitle] = useState("Chatten");
     const [chatRoomName, setChatRoomName] = useState("");
+    const [message, setMessage] = useState("");
+    const [messageList, setMessageList] = useState([{}]);
+    const [usersInSelectedChatRoom, setUsersInSelectedChatRoom] = useState([{}]);
     const [selectedOption, setSelectedOption] = useState(null);
     const [myChatRooms, setMyChatRooms] = useState();
     const chatRoomRef = firestore.collection("chatrooms");
@@ -30,16 +32,6 @@ const Chat = () => {
         { value: 'vanilla', label: 'Vanilla' },
     ])
 
-
-
-
-    const convertStringsLexographical = (user1, user2) => {
-        var roomName = 'chat_' + (user1 < user2 ? user1 + '_' + user2 : user2 + '_' + user1);
-        return roomName
-        /*  for (let index = 0; index < users.length; index++) {
-             const element = users[index];
-         } */
-    }
     const getFriends = async () => {
         try {
             const friendsCollection = await firestore.collection("/users/" + user.uid + "/friends").get();
@@ -72,35 +64,34 @@ const Chat = () => {
 
     const cancel = () => {
         setProgressCounter(0);
+        const unsubscribe = chatRoomRef.doc(processTitle).collection("messages").onSnapshot(onSnapshot => {
+
+        })
+
+        unsubscribe();
+        setProcessTitle("Chatten");
     }
 
-    const func = () => {
-        console.log(userSubCol);
-    }
 
     const loadChatRoom = async (index, array) => {
-        console.log(index);
         if (index >= array.length) {
-            console.log(userSubCol);
             setMyChatRooms(userSubCol);
         } else {
             const chatRoom = array[index];
             let subCollection = await chatRoomRef.doc(chatRoom.id).collection("users").get();
             subCollection.forEach(subColDoc => {
                 if (subColDoc.id == user.uid) {
-                    userSubCol.push(chatRoom.id)
+                    userSubCol.push({ id: chatRoom.id })
                 }
             });
             index++;
             loadChatRoom(index, array);
         }
-
-
     }
 
     const getMyChatRooms = async () => {
         const testArray = []
-        
+
         const allChatRooms = await chatRoomRef.get();
         try {
             allChatRooms.forEach(doc => {
@@ -108,32 +99,56 @@ const Chat = () => {
             });
 
             loadChatRoom(0, testArray);
-            /* 
-                        allChatRooms.forEach(async doc => {
-                            let subCollection = await chatRoomRef.doc(doc.id).collection("users").get()
-                            subCollection.forEach(subColDoc => {
-                                if (subColDoc.id == user.uid) {
-                                    userSubCol.push({ id: doc.id });
-                                    console.log(userSubCol);
-            
-                                }
-                            });
-                        }); */
+
 
         } catch (error) {
 
         }
     }
 
+    const selectChatRoom = async (chatroomId) => {
+        let tempMessages = [];
+        setProgressCounter(null);
+        setProcessTitle(chatroomId);
+        await chatRoomRef.doc(chatroomId).collection("messages").onSnapshot(onSnapshot => {
+            onSnapshot.docChanges().forEach(change => {
+                if (change.type === 'added') {
+                    tempMessages.push(change.doc.data());
+                }
+            })
+        })
+        setMessageList(tempMessages);
+        getParticipantsInRoom(chatroomId);
+    }
 
+    const getParticipantsInRoom = async (chatroomId) => {
+        let tempFriendsList = []
+        try {
+            const usersInRoom = await chatRoomRef.doc(chatroomId).collection("users").get();
+            usersInRoom.forEach(user => {
+                tempFriendList.push(user.data());
+            });
+            setUsersInSelectedChatRoom(tempFriendList);
+        } catch (error) {
+
+        }
+    }
 
     const createRoomWithFriends = async () => {
+        let tempFriendsListWithSelf = [{ label: displayName, value: uid }];
         try {
-            await selectedOption.forEach(element => {
-                const setFriendsIndRoom = firestore.collection("chatrooms").doc(chatRoomName).collection("users").doc(element.value).set({ name: element.label });
+            
+            selectedOption.forEach(element => {
+                tempFriendsListWithSelf.push({label: element.label, value: element. value});
+               // const setFriendsIndRoom = firestore.collection("chatrooms").doc(chatRoomName).collection("users").doc(element.value).set({ name: element.label });
             });
+            await tempFriendsListWithSelf.forEach(friend => {
+                const setFriendsIndRoom = firestore.collection("chatrooms").doc(chatRoomName).collection("users").doc(friend.value).set({ name: friend.label });
 
-            //setFriendsIndRoom.collection("users").add(selectedOption);
+            })
+            setProgressCounter(0)
+            getMyChatRooms();
+
         } catch (error) {
 
         }
@@ -144,6 +159,15 @@ const Chat = () => {
         getFriends();
         getMyChatRooms();
     }, [])
+
+    const sendMessage = async () => {
+
+        await chatRoomRef.doc(processTitle).collection("messages").add({ name: displayName, uid: uid, message: message, created: new Date() });
+        setMessage("");
+        console.log(messageList);
+
+    }
+
     return (
         <div style={{ float: 'right', width: '100%', textAlign: 'center', color: 'white' }}>
             <h1 style={{ fontSize: '50px' }}>{processTitle}</h1>
@@ -155,11 +179,6 @@ const Chat = () => {
                     </p>
                     <input placeholder="Chatroom name" style={{ padding: '10px', marginRight: '10px', color: 'black' }} onChange={e => setChatRoomName(e.target.value)}></input>
                     <button style={{ background: 'white', padding: '10px', color: 'black' }} onClick={() => createChatRoomAndGoNext()}>Next</button>
-                    {myChatRooms && myChatRooms.map((index, chatroom) => {
-                        return (
-                            <h2 key={index}>{"chatroom"}</h2>
-                        )
-                    })}
                 </div>
             }
             <div>
@@ -197,9 +216,63 @@ const Chat = () => {
                     <button style={{ background: 'white', padding: '10px', color: 'black' }} onClick={() => createRoomWithFriends()}>Confirm and create room</button>
                 </div>
                 }
+                <div style={{ position: "absolute", bottom: '0', right: '0' }}>
+                    <h2>Select a room to chat in:</h2>
+                    {myChatRooms && myChatRooms.map((chatroom) => {
+                        return (
+                            <div>
+                                <button key={chatroom.id} onClick={() => selectChatRoom(chatroom.id)}>{chatroom.id}</button>
+                            </div>
+                        )
+                    })}
+                </div>
+                {progressCounter === null && <div style={{ position: "absolute", top: '0', right: '0' }}><button onClick={() => cancel()}>Back</button></div>}
+
+                {progressCounter === null &&
+                    <div style={{ position: "absolute", bottom: '0', left: '0' }}>
+                        <h2>People in this</h2>
+                        {usersInSelectedChatRoom.map((userInRoom) => {
+                            return (
+                                <div><p>{userInRoom.name}</p></div>
+                            )
+                        })}
+                    </div>
+                }
+
+                {progressCounter === null &&
+                    <div>
+                        <div style={{ height: '500px', maxHeight: '500px', overflow: "auto", margin: "auto", width: '50%' }}>
+                            {messageList && messageList.map((message) => {
+                                if (message.uid === uid) {
+                                    return (
+                                        <div style = {{marginLeft: '50%'}}>
+                                            <label style={{ fontSize: '10px', marginLeft: '5px' }}>{message.name}</label>
+                                            <p style = {{background: 'dodgerblue', borderRadius: '20px', borderStyle: "solid", borderWidth: '1px'}}>{message.message}</p>
+                                        </div>
+                                    )
+                                }
+                                else {
+                                    return (
+                                        <div style = {{marginRight: '50%'}}>
+                                            <label style={{ fontSize: '10px', marginLeft: '5px' }}>{message.name}</label>
+                                            <p style = {{background: 'dodgerblue', borderRadius: '20px', borderStyle: "solid", borderWidth: '1px'}}>{message.message}</p>
+                                        </div>
+                                        )
+                                }
+                            })}
+
+
+                        </div>
+                        <input value={message} style={{ color: "black", marginTop: '10px', padding: "10px" }} onChange={e => setMessage(e.target.value)}></input><button onClick={() => sendMessage()} style={{ background: 'white', padding: '10px', color: 'black', marginLeft: '10px' }}>Send</button>
+                    </div>
+                }
+
             </div>
         </div>
     )
 
 }
+
+
+
 export default Chat

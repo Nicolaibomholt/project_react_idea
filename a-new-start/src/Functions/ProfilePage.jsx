@@ -7,7 +7,7 @@ const ProfilePage = () => {
   const user = useContext(UserContext);
   const {photoURL, displayName, email, uid} = user;
   const [showFriends, setShowFriends] = useState(true);
-  const [searchMessage, setSearchMessage] = useState("Friend found");
+  const [searchMessage, setSearchMessage] = useState("Add friend by ID");
   const [idInputField, setIdInputFiel] = useState("")
   const [friendstList, setFrinedsList] = useState([{}]);
   const tempFriendList = [];
@@ -16,12 +16,19 @@ const ProfilePage = () => {
   
 
   const searchForFriend = async () => {
-      console.log("searching..");
       try {
-        const friend = await firestore.doc("/users/" + idInputField).get().then(setShowFriends(false));
-        setSearchResult(friend.data());
+        const friend = await firestore.doc("/users/" + idInputField).get().then();
+
+        if (friend.data() != undefined) {
+            setSearchResult(friend.data());
+            setShowFriends(false);
+        }
+        else {
+            setSearchMessage("Friend not found");
+        }
+        
       } catch (error) {
-          setSearchMessage("Friend not found")
+          //setSearchMessage("Friend not found")
       } 
   }
 
@@ -82,7 +89,7 @@ const ProfilePage = () => {
       })}
       {showFriends &&
       <div>
-      <h2 className = "text-2xl font-semibold">Add friend by ID</h2>
+      <h2 className = "text-2xl font-semibold">{searchMessage}</h2>
       <input style ={{padding: '10px'}} placeholder="Your friends ID" onChange = {e => setIdInputFiel(e.target.value)}>
       </input>
       <button style ={{background: 'white', float: 'right', padding: '10px'}} onClick ={() => searchForFriend()}>Search</button>
@@ -90,7 +97,7 @@ const ProfilePage = () => {
 }
         {!showFriends &&
       <div>
-      <h2 className = "text-2xl font-semibold">{searchMessage}</h2>   
+      <h2 className = "text-2xl font-semibold">Friend found</h2>   
       <div style = {{marginBottom: '20px', borderWidth: 'thin', padding: '5px', borderRadius: '25px'}}>Name: {searchResult.displayName} <br/> Mail: {searchResult.email}</div>
       <button style ={{background: 'white', marginLeft: '0px', padding: '10px'}} onClick ={() => setShowFriends(true)}>Search again</button>
       <button style ={{background: 'white', float: 'right', padding: '10px'}} onClick = {() => addFriend()}>Add friend</button>

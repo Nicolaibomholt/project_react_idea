@@ -11,6 +11,8 @@ import Chat from "./Functions/Chat"
 import MenuContainer from "./Functions/MenuContainer";
 function Application() {
   const user = useContext(UserContext);
+
+  
   return (
         
         user ?
