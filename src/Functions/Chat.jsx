@@ -107,17 +107,18 @@ const Chat = () => {
     }
 
     const selectChatRoom = async (chatroomId) => {
-        let tempMessages = [];
+        setMessageList([{}]);
         setProgressCounter(null);
         setProcessTitle(chatroomId);
-        await chatRoomRef.doc(chatroomId).collection("messages").onSnapshot(onSnapshot => {
+        chatRoomRef.doc(chatroomId).collection("messages").orderBy("created", "asc").onSnapshot(onSnapshot => {
             onSnapshot.docChanges().forEach(change => {
                 if (change.type === 'added') {
-                    tempMessages.push(change.doc.data());
+                    setMessageList(prevMessageList => [...prevMessageList, change.doc.data()]);
                 }
             })
+            //setMessageList(tempMessages);
         })
-        setMessageList(tempMessages);
+        
         getParticipantsInRoom(chatroomId);
     }
 

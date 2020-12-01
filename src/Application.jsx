@@ -24,9 +24,9 @@ function Application() {
         </Router>
       :
         <Router>
-          <SignUp path="signUp" />
+          <SignUp path="/base/signUp" />
           <SignIn path="/base" />
-          <PasswordReset path = "passwordReset" />
+          <PasswordReset path = "/base/passwordReset" />
         </Router>
       
   );
