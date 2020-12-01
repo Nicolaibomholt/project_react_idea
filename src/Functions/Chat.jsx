@@ -152,7 +152,6 @@ const Chat = () => {
     }
 
     useEffect(() => {
-        console.log(user.uid);
         getFriends();
         getMyChatRooms();
     }, [])
@@ -163,6 +162,11 @@ const Chat = () => {
 
     }
 
+    const handleEnter = (e) => {
+        if (e.keyCode == 13) {
+            sendMessage();
+        }
+    } 
     return (
         <div style={{ float: 'right', width: '100%', textAlign: 'center', color: 'white' }}>
             <h1 style={{ fontSize: '50px' }}>{processTitle}</h1>
@@ -258,7 +262,7 @@ const Chat = () => {
 
                         <ScrollComponent></ScrollComponent>
                         </div>
-                        <input value={message} style={{ color: "black", marginTop: '10px', padding: "10px" }} onChange={e => setMessage(e.target.value)}></input><button onClick={() => sendMessage()} style={{ background: 'white', padding: '10px', color: 'black', marginLeft: '10px' }}>Send</button>
+                        <input onKeyDown = {handleEnter} value={message} style={{ color: "black", marginTop: '10px', padding: "10px" }} onChange={e => setMessage(e.target.value)}></input><button onClick={() => sendMessage()} style={{ background: 'white', padding: '10px', color: 'black', marginLeft: '10px' }}>Send</button>
                     </div>
                 }
 
