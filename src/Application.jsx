@@ -17,7 +17,7 @@ function Application() {
         
         user ?
         <Router>
-        <ProfilePage path = "/base">
+        <ProfilePage path = "/">
         </ProfilePage>
         <About path = "/About"></About>
         <Chat path = "/Chat"></Chat>
@@ -25,7 +25,7 @@ function Application() {
       :
         <Router>
           <SignUp path="signUp" />
-          <SignIn path="/base" />
+          <SignIn path="/" />
           <PasswordReset path = "passwordReset" />
         </Router>
       
