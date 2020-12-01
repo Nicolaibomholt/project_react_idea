@@ -1,6 +1,6 @@
 import { firestore } from '../providers/firebase'
 import { UserContext } from "../providers/UserProvider";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import Select from 'react-select';
 
 /*
@@ -9,12 +9,12 @@ progress counter:
 1 = add friends
 2 = Confirm
 */
-
 const Chat = () => {
     const tempFriendList = [];
+    
 
     const user = useContext(UserContext);
-    const { photoURL, displayName, email, uid } = user;
+    const {displayName, uid } = user;
     const [progressCounter, setProgressCounter] = useState(0);
     const [processTitle, setProcessTitle] = useState("Chatten");
     const [chatRoomName, setChatRoomName] = useState("");
@@ -37,8 +37,6 @@ const Chat = () => {
             const friendsCollection = await firestore.collection("/users/" + user.uid + "/friends").get();
             friendsCollection.forEach(doc => {
                 tempFriendList.push({ label: doc.data().searchResult.displayName, value: doc.id });
-
-                //tempFriendList.push(doc.data().searchResult, {id: doc.id});
             });
             setOptions(tempFriendList);
             console.log(tempFriendList);
@@ -107,23 +105,22 @@ const Chat = () => {
     }
 
     const selectChatRoom = async (chatroomId) => {
-        setMessageList([{}]);
+        let tempMessages = [];
         setProgressCounter(null);
         setProcessTitle(chatroomId);
-        chatRoomRef.doc(chatroomId).collection("messages").orderBy("created", "asc").onSnapshot(onSnapshot => {
-            onSnapshot.docChanges().forEach(change => {
-                if (change.type === 'added') {
-                    setMessageList(prevMessageList => [...prevMessageList, change.doc.data()]);
-                }
+        const subref = await chatRoomRef.doc(chatroomId).collection("messages").orderBy("created", "asc").onSnapshot(onSnapshot => {
+            onSnapshot.forEach(message => {
+                tempMessages.push(message.data());
             })
-            //setMessageList(tempMessages);
-        })
+
+            setMessageList(tempMessages);
+            tempMessages = [];
+        });
         
         getParticipantsInRoom(chatroomId);
     }
 
     const getParticipantsInRoom = async (chatroomId) => {
-        let tempFriendsList = []
         try {
             const usersInRoom = await chatRoomRef.doc(chatroomId).collection("users").get();
             usersInRoom.forEach(user => {
@@ -141,7 +138,6 @@ const Chat = () => {
             
             selectedOption.forEach(element => {
                 tempFriendsListWithSelf.push({label: element.label, value: element. value});
-               // const setFriendsIndRoom = firestore.collection("chatrooms").doc(chatRoomName).collection("users").doc(element.value).set({ name: element.label });
             });
             await tempFriendsListWithSelf.forEach(friend => {
                 const setFriendsIndRoom = firestore.collection("chatrooms").doc(chatRoomName).collection("users").doc(friend.value).set({ name: friend.label });
@@ -162,10 +158,8 @@ const Chat = () => {
     }, [])
 
     const sendMessage = async () => {
-
         await chatRoomRef.doc(processTitle).collection("messages").add({ name: displayName, uid: uid, message: message, created: new Date() });
         setMessage("");
-        console.log(messageList);
 
     }
 
@@ -262,7 +256,7 @@ const Chat = () => {
                                 }
                             })}
 
-
+                        <ScrollComponent></ScrollComponent>
                         </div>
                         <input value={message} style={{ color: "black", marginTop: '10px', padding: "10px" }} onChange={e => setMessage(e.target.value)}></input><button onClick={() => sendMessage()} style={{ background: 'white', padding: '10px', color: 'black', marginLeft: '10px' }}>Send</button>
                     </div>
@@ -274,6 +268,15 @@ const Chat = () => {
 
 }
 
+const ScrollComponent = () => {
+    const divRef = useRef(null);
+  
+    useEffect(() => {
+      divRef.current.scrollIntoView({ behavior: 'smooth' });
+    });
+  
+    return <div ref={divRef} />;
+  }
 
 
 export default Chat
