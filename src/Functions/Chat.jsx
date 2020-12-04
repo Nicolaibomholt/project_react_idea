@@ -2,6 +2,9 @@ import { firestore } from '../providers/firebase'
 import { UserContext } from "../providers/UserProvider";
 import React, { useState, useContext, useEffect, useRef } from "react";
 import Select from 'react-select';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+import { Button, Spinner } from 'react-bootstrap';
 
 /*
 progress counter:
@@ -11,10 +14,10 @@ progress counter:
 */
 const Chat = () => {
     const tempFriendList = [];
-    
+
 
     const user = useContext(UserContext);
-    const {displayName, uid } = user;
+    const { displayName, uid } = user;
     const [progressCounter, setProgressCounter] = useState(0);
     const [processTitle, setProcessTitle] = useState("Chatten");
     const [chatRoomName, setChatRoomName] = useState("");
@@ -23,6 +26,7 @@ const Chat = () => {
     const [usersInSelectedChatRoom, setUsersInSelectedChatRoom] = useState([{}]);
     const [selectedOption, setSelectedOption] = useState(null);
     const [myChatRooms, setMyChatRooms] = useState();
+    const [loading, setLoading] = useState(false);
     const chatRoomRef = firestore.collection("chatrooms");
     const userSubCol = [];
 
@@ -74,6 +78,7 @@ const Chat = () => {
     const loadChatRoom = async (index, array) => {
         if (index >= array.length) {
             setMyChatRooms(userSubCol);
+            setLoading(false);
         } else {
             const chatRoom = array[index];
             let subCollection = await chatRoomRef.doc(chatRoom.id).collection("users").get();
@@ -89,7 +94,7 @@ const Chat = () => {
 
     const getMyChatRooms = async () => {
         const testArray = []
-
+        setLoading(true);
         const allChatRooms = await chatRoomRef.get();
         try {
             allChatRooms.forEach(doc => {
@@ -116,7 +121,7 @@ const Chat = () => {
             setMessageList(tempMessages);
             tempMessages = [];
         });
-        
+
         getParticipantsInRoom(chatroomId);
     }
 
@@ -135,9 +140,9 @@ const Chat = () => {
     const createRoomWithFriends = async () => {
         let tempFriendsListWithSelf = [{ label: displayName, value: uid }];
         try {
-            
+
             selectedOption.forEach(element => {
-                tempFriendsListWithSelf.push({label: element.label, value: element.value});
+                tempFriendsListWithSelf.push({ label: element.label, value: element.value });
             });
             await tempFriendsListWithSelf.forEach(friend => {
                 const setFriendsIndRoom = firestore.collection("chatrooms").doc(chatRoomName).collection("users").doc(friend.value).set({ name: friend.label });
@@ -167,24 +172,29 @@ const Chat = () => {
             sendMessage();
         }
     }
-    
+
     const addFriendToChat = async () => {
-        await chatRoomRef.doc(processTitle).collection("users").doc(selectedOption.value).set({name: selectedOption.label});
+        await chatRoomRef.doc(processTitle).collection("users").doc(selectedOption.value).set({ name: selectedOption.label });
         getParticipantsInRoom(processTitle);
         setSelectedOption(null);
     }
     return (
         <div style={{ float: 'right', width: '100%', textAlign: 'center', color: 'white' }}>
+            {loading &&
+                        <Spinner animation="border" style = {{width: '75px', height: '75px', position: "absolute", top: '40%', right: '50%'}}/>
+            }
             <h1 style={{ fontSize: '50px' }}>{processTitle}</h1>
 
-            {progressCounter === 0 &&
+            {progressCounter === 0 && !loading && 
                 <div>
                     <p>
                         Begin by entering in a chatroom name
                     </p>
                     <input placeholder="Chatroom name" style={{ padding: '10px', marginRight: '10px', color: 'black' }} onChange={e => setChatRoomName(e.target.value)}></input>
-                    <button style={{ background: 'white', padding: '10px', color: 'black' }} onClick={() => createChatRoomAndGoNext()}>Next</button>
+                    <Button style={{ background: 'white', padding: '10px', color: 'black' }} onClick={() => createChatRoomAndGoNext()}>Next</Button>
+                    
                 </div>
+
             }
             <div>
 
@@ -199,8 +209,8 @@ const Chat = () => {
                                 isMulti={true}
 
                             />
-                            <button style={{ background: 'white', padding: '10px', color: 'black', marginRight: '10px' }} onClick={() => cancel()}>Cancel</button>
-                            <button style={{ background: 'white', padding: '10px', color: 'black', marginLeft: '10px' }} onClick={() => openConfirmWindow()}>Next</button>
+                            <Button style={{ background: 'white', padding: '10px', color: 'black', marginRight: '10px' }} onClick={() => cancel()}>Cancel</Button>
+                            <Button style={{ background: 'white', padding: '10px', color: 'black', marginLeft: '10px' }} onClick={() => openConfirmWindow()}>Next</Button>
                         </div>
                     </div>
                 }
@@ -217,21 +227,21 @@ const Chat = () => {
                         )
                     })
                     }
-                    <button style={{ background: 'white', padding: '10px', color: 'black', marginRight: '10px' }} onClick={() => cancel()}>Cancel</button>
-                    <button style={{ background: 'white', padding: '10px', color: 'black' }} onClick={() => createRoomWithFriends()}>Confirm and create room</button>
+                    <Button style={{ background: 'white', padding: '10px', color: 'black', marginRight: '10px' }} onClick={() => cancel()}>Cancel</Button>
+                    <Button style={{ background: 'white', padding: '10px', color: 'black' }} onClick={() => createRoomWithFriends()}>Confirm and create room</Button>
                 </div>
                 }
                 <div style={{ position: "absolute", bottom: '0', right: '0' }}>
                     <h2>Select a room to chat in:</h2>
                     {myChatRooms && myChatRooms.map((chatroom) => {
                         return (
-                            <div>
-                                <button key={chatroom.id} onClick={() => selectChatRoom(chatroom.id)}>{chatroom.id}</button>
+                            <div style = {{display: "flex"}}>
+                                <Button key={chatroom.id} onClick={() => selectChatRoom(chatroom.id)}>{chatroom.id}</Button>
                             </div>
                         )
                     })}
                 </div>
-                {progressCounter === null && <div style={{ position: "absolute", top: '0', right: '0' }}><button onClick={() => cancel()}>Back</button></div>}
+                {progressCounter === null && <div style={{ position: "absolute", top: '0', right: '0' }}><Button onClick={() => cancel()}>Back</Button></div>}
 
                 {progressCounter === null &&
                     <div style={{ position: "absolute", bottom: '0', left: '0' }}>
@@ -250,39 +260,40 @@ const Chat = () => {
                             {messageList && messageList.map((message) => {
                                 if (message.uid === uid) {
                                     return (
-                                        <div style = {{marginLeft: '50%'}}>
+                                        <div style={{ marginLeft: '50%' }}>
                                             <label style={{ fontSize: '10px', marginLeft: '5px' }}>{displayName}</label>
-                                            <p style = {{background: 'dodgerblue', borderRadius: '20px', borderStyle: "solid", borderWidth: '1px'}}>{message.message}</p>
+                                            <p style={{ background: 'dodgerblue', borderRadius: '20px', borderStyle: "solid", borderWidth: '1px' }}>{message.message}</p>
                                         </div>
                                     )
                                 }
                                 else {
                                     return (
-                                        <div style = {{marginRight: '50%'}}>
+                                        <div style={{ marginRight: '50%' }}>
                                             <label style={{ fontSize: '10px', marginLeft: '5px' }}>{message.name}</label>
-                                            <p style = {{background: '#a0aec0', borderRadius: '20px', borderStyle: "solid", borderWidth: '1px'}}>{message.message}</p>
+                                            <p style={{ background: '#a0aec0', borderRadius: '20px', borderStyle: "solid", borderWidth: '1px' }}>{message.message}</p>
                                         </div>
-                                        )
+                                    )
                                 }
                             })}
-                        <ScrollComponent></ScrollComponent>
-                        
-                        <div style={{color: "black", position: 'absolute', left: '0', top: '45%'}}>
-                        <p style = {{color: "white"}}>Add friend to chat</p>
-                            <Select
-                                defaultValue={selectedOption}
-                                onChange={setSelectedOption}
-                                   options={options}
-                            />
-                            <button style={{ background: 'white', padding: '10px', color: 'black', marginLeft: '10px' }} onClick={() => addFriendToChat()}>Add</button>
+                            <ScrollComponent></ScrollComponent>
+
+                            <div style={{ color: "black", position: 'absolute', left: '0', top: '45%' }}>
+                                <p style={{ color: "white" }}>Add friend to chat</p>
+                                <Select
+                                    defaultValue={selectedOption}
+                                    onChange={setSelectedOption}
+                                    options={options}
+                                />
+                                <Button style={{ padding: '10px', color: 'black', marginLeft: '10px' }} onClick={() => addFriendToChat()}>Add</Button>
+                            </div>
+
                         </div>
-                        
-                        </div>
-                        <input onKeyDown = {handleEnter} value={message} style={{ color: "black", marginTop: '10px', padding: "10px" }} onChange={e => setMessage(e.target.value)}></input><button onClick={() => sendMessage()} style={{ background: 'white', padding: '10px', color: 'black', marginLeft: '10px' }}>Send</button>
+                        <input onKeyDown={handleEnter} value={message} style={{ color: "black", marginTop: '10px', padding: "10px" }} onChange={e => setMessage(e.target.value)}></input><Button onClick={() => sendMessage()} style={{ background: 'white', padding: '10px', color: 'black', marginLeft: '10px' }}>Send</Button>
                     </div>
                 }
 
             </div>
+
         </div>
     )
 
@@ -290,13 +301,13 @@ const Chat = () => {
 
 const ScrollComponent = () => {
     const divRef = useRef(null);
-  
+
     useEffect(() => {
-      divRef.current.scrollIntoView({ behavior: 'smooth' });
+        divRef.current.scrollIntoView({ behavior: 'smooth' });
     });
-  
+
     return <div ref={divRef} />;
-  }
+}
 
 
 export default Chat

@@ -64,7 +64,7 @@ const ProfilePage = () => {
 
   return (
       <div>
-    <div className = "mx-auto w-11/12 md:w-2/4 py-8 px-4 md:px-8" style= {{float: 'right'}}> 
+    <div className = "mx-auto w-11/12 md:w-2/4 py-8 px-4 md:px-8" style= {{float: 'right', color: "white"}}> 
       <div className="flex border flex-col items-center md:flex-row md:items-start border-blue-400 px-3 py-4" style = {{textAlign: 'end'}}>
         <div
           style={{
@@ -90,9 +90,9 @@ const ProfilePage = () => {
       {showFriends &&
       <div>
       <h2 className = "text-2xl font-semibold">{searchMessage}</h2>
-      <input style ={{padding: '10px'}} placeholder="Your friends ID" onChange = {e => setIdInputFiel(e.target.value)}>
+      <input style ={{padding: '10px', color: "black"}} placeholder="Your friends ID" onChange = {e => setIdInputFiel(e.target.value)}>
       </input>
-      <button style ={{background: 'white', float: 'right', padding: '10px'}} onClick ={() => searchForFriend()}>Search</button>
+      <button style ={{background: 'white', float: 'right', padding: '10px', color: "black"}} onClick ={() => searchForFriend()}>Search</button>
       </div>
 }
         {!showFriends &&

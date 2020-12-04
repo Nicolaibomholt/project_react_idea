@@ -9,6 +9,7 @@ import PasswordReset from "./Functions/PasswordReset";
 import About from "./Functions/About";
 import Chat from "./Functions/Chat"
 import MenuContainer from "./Functions/MenuContainer";
+import MapGame from "./Functions/MapGame";
 function Application() {
   const user = useContext(UserContext);
 
@@ -21,6 +22,7 @@ function Application() {
         </ProfilePage>
         <About path = "/About"></About>
         <Chat path = "/Chat"></Chat>
+        <MapGame path ="/Map"> </MapGame>
         </Router>
       :
         <Router>
