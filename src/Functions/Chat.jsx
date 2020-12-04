@@ -235,7 +235,7 @@ const Chat = () => {
 
                 {progressCounter === null &&
                     <div style={{ position: "absolute", bottom: '0', left: '0' }}>
-                        <h2>People in this</h2>
+                        <h2>People in this chat</h2>
                         {usersInSelectedChatRoom.map((userInRoom) => {
                             return (
                                 <div><p>{userInRoom.name}</p></div>
@@ -251,7 +251,7 @@ const Chat = () => {
                                 if (message.uid === uid) {
                                     return (
                                         <div style = {{marginLeft: '50%'}}>
-                                            <label style={{ fontSize: '10px', marginLeft: '5px' }}>½</label>
+                                            <label style={{ fontSize: '10px', marginLeft: '5px' }}>{displayName}</label>
                                             <p style = {{background: 'dodgerblue', borderRadius: '20px', borderStyle: "solid", borderWidth: '1px'}}>{message.message}</p>
                                         </div>
                                     )
@@ -260,7 +260,7 @@ const Chat = () => {
                                     return (
                                         <div style = {{marginRight: '50%'}}>
                                             <label style={{ fontSize: '10px', marginLeft: '5px' }}>{message.name}</label>
-                                            <p style = {{background: 'dodgerblue', borderRadius: '20px', borderStyle: "solid", borderWidth: '1px'}}>{message.message}</p>
+                                            <p style = {{background: '#a0aec0', borderRadius: '20px', borderStyle: "solid", borderWidth: '1px'}}>{message.message}</p>
                                         </div>
                                         )
                                 }
