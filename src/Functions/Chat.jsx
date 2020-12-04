@@ -137,7 +137,7 @@ const Chat = () => {
         try {
             
             selectedOption.forEach(element => {
-                tempFriendsListWithSelf.push({label: element.label, value: element. value});
+                tempFriendsListWithSelf.push({label: element.label, value: element.value});
             });
             await tempFriendsListWithSelf.forEach(friend => {
                 const setFriendsIndRoom = firestore.collection("chatrooms").doc(chatRoomName).collection("users").doc(friend.value).set({ name: friend.label });
@@ -166,7 +166,13 @@ const Chat = () => {
         if (e.keyCode == 13) {
             sendMessage();
         }
-    } 
+    }
+    
+    const addFriendToChat = async () => {
+        await chatRoomRef.doc(processTitle).collection("users").doc(selectedOption.value).set({name: selectedOption.label});
+        getParticipantsInRoom(processTitle);
+        setSelectedOption(null);
+    }
     return (
         <div style={{ float: 'right', width: '100%', textAlign: 'center', color: 'white' }}>
             <h1 style={{ fontSize: '50px' }}>{processTitle}</h1>
@@ -245,7 +251,7 @@ const Chat = () => {
                                 if (message.uid === uid) {
                                     return (
                                         <div style = {{marginLeft: '50%'}}>
-                                            <label style={{ fontSize: '10px', marginLeft: '5px' }}>{message.name}</label>
+                                            <label style={{ fontSize: '10px', marginLeft: '5px' }}>½</label>
                                             <p style = {{background: 'dodgerblue', borderRadius: '20px', borderStyle: "solid", borderWidth: '1px'}}>{message.message}</p>
                                         </div>
                                     )
@@ -259,8 +265,18 @@ const Chat = () => {
                                         )
                                 }
                             })}
-
                         <ScrollComponent></ScrollComponent>
+                        
+                        <div style={{color: "black", position: 'absolute', left: '0', top: '45%'}}>
+                        <p style = {{color: "white"}}>Add friend to chat</p>
+                            <Select
+                                defaultValue={selectedOption}
+                                onChange={setSelectedOption}
+                                   options={options}
+                            />
+                            <button style={{ background: 'white', padding: '10px', color: 'black', marginLeft: '10px' }} onClick={() => addFriendToChat()}>Add</button>
+                        </div>
+                        
                         </div>
                         <input onKeyDown = {handleEnter} value={message} style={{ color: "black", marginTop: '10px', padding: "10px" }} onChange={e => setMessage(e.target.value)}></input><button onClick={() => sendMessage()} style={{ background: 'white', padding: '10px', color: 'black', marginLeft: '10px' }}>Send</button>
                     </div>
