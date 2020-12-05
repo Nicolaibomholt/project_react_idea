@@ -99,8 +99,8 @@ const ProfilePage = () => {
       <div>
       <h2 className = "text-2xl font-semibold">Friend found</h2>   
       <div style = {{marginBottom: '20px', borderWidth: 'thin', padding: '5px', borderRadius: '25px'}}>Name: {searchResult.displayName} <br/> Mail: {searchResult.email}</div>
-      <button style ={{background: 'white', marginLeft: '0px', padding: '10px'}} onClick ={() => setShowFriends(true)}>Search again</button>
-      <button style ={{background: 'white', float: 'right', padding: '10px'}} onClick = {() => addFriend()}>Add friend</button>
+      <button style ={{background: 'white', marginLeft: '0px', padding: '10px', color: "black"}} onClick ={() => setShowFriends(true)}>Search again</button>
+      <button style ={{background: 'white', float: 'right', padding: '10px', color: "black"}} onClick = {() => addFriend()}>Add friend</button>
       </div>
       }
 

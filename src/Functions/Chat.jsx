@@ -113,7 +113,7 @@ const Chat = () => {
         let tempMessages = [];
         setProgressCounter(null);
         setProcessTitle(chatroomId);
-        const subref = await chatRoomRef.doc(chatroomId).collection("messages").orderBy("created", "asc").onSnapshot(onSnapshot => {
+        const subref = await chatRoomRef.doc(chatroomId).collection("messages").orderBy("created", "asc").limitToLast(15).onSnapshot(onSnapshot => {
             onSnapshot.forEach(message => {
                 tempMessages.push(message.data());
             })
@@ -231,6 +231,7 @@ const Chat = () => {
                     <Button style={{ background: 'white', padding: '10px', color: 'black' }} onClick={() => createRoomWithFriends()}>Confirm and create room</Button>
                 </div>
                 }
+                {!loading && 
                 <div style={{ position: "absolute", bottom: '0', right: '0' }}>
                     <h2>Select a room to chat in:</h2>
                     {myChatRooms && myChatRooms.map((chatroom) => {
@@ -241,6 +242,7 @@ const Chat = () => {
                         )
                     })}
                 </div>
+                }
                 {progressCounter === null && <div style={{ position: "absolute", top: '0', right: '0' }}><Button onClick={() => cancel()}>Back</Button></div>}
 
                 {progressCounter === null &&
